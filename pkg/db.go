@@ -1,4 +1,4 @@
-package infrastructure
+package pkg
 
 import (
 	"fmt"
@@ -17,11 +17,11 @@ const (
 
 type DatabaseError struct {
 	Type    DatabaseErrorType
-	Details string
+	Message string
 }
 
 func (err DatabaseError) Error() string {
-	return err.Details
+	return err.Message
 }
 
 func CreateDatabase(config Config) *sqlx.DB {

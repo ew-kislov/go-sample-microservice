@@ -1,4 +1,4 @@
-package infrastructure
+package pkg
 
 import (
 	"context"
@@ -58,7 +58,7 @@ func (repository *BaseRepository) Insert(ctx context.Context, params InsertParam
 	}
 
 	if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
-		return 0, DatabaseError{Type: DuplicateError, Details: err.Error()}
+		return 0, DatabaseError{Type: DuplicateError, Message: err.Error()}
 	}
 
 	if err != nil {
@@ -88,7 +88,7 @@ func (repository *BaseRepository) SelectById(ctx context.Context, params SelectB
 	}
 
 	if result == nil {
-		return DatabaseError{Type: NotFound, Details: ""}
+		return DatabaseError{Type: NotFound, Message: "Record not found"}
 	}
 
 	return nil
