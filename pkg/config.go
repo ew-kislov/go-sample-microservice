@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	Production  string = "Production"
-	Development        = "Development"
+	Production  = "Production"
+	Development = "Development"
 )
 
 type Config struct {
@@ -23,11 +23,10 @@ type Config struct {
 	ElasticSearch    string `mapstructure:"ELASTIC_SEARCH_HOST"`
 }
 
-func ParseConfig() Config {
+func ParseConfig(configPath string) Config {
 	var config Config
 
-	viper.AddConfigPath(".")
-	viper.SetConfigName("app")
+	viper.SetConfigFile(configPath)
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()

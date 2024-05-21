@@ -19,8 +19,8 @@ func (controller *signUpController) SignUp(ctx *gin.Context) {
 	response, err := controller.AuthService.SignUp(ctx, userservice.CreateUserParams(body))
 
 	if err != nil {
-		ctx.JSON(400, gin.H{"success": false, "message": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
 	} else {
-		ctx.JSON(200, gin.H{"success": true, "data": response})
+		ctx.JSON(http.StatusCreated, gin.H{"success": true, "data": response})
 	}
 }

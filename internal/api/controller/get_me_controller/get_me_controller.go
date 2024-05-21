@@ -1,6 +1,8 @@
 package getmecontroller
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 
 	userservice "github.com/ew-kislov/go-sample-microservice/internal/service/user_service"
@@ -17,5 +19,5 @@ func (controller *getMeController) GetMe(ctx *gin.Context) {
 		Username:    user.Username,
 	}
 
-	ctx.JSON(200, gin.H{"success": true, "data": userResponse})
+	ctx.JSON(http.StatusOK, gin.H{"success": true, "data": userResponse})
 }
