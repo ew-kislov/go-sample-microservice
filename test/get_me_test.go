@@ -1,14 +1,15 @@
 package integration_test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"testing"
 
-	userservice "github.com/ew-kislov/go-sample-microservice/internal/service/user_service"
-	"github.com/ew-kislov/go-sample-microservice/pkg"
+	authservice "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service"
+	"github.com/ew-kislov/go-sample-microservice/pkg/jwt"
 	"github.com/google/uuid"
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/assert"
@@ -29,17 +30,19 @@ func TestGetMe(t *testing.T) {
 	})
 
 	t.Run("Returns user", func(t *testing.T) {
-		var id int
-
 		username := fmt.Sprintf("user-%s", uuid.New().String())
 		email := fmt.Sprintf("%s@test.com", uuid.New().String())
-		salt, _ := pkg.RandHexString(16)
-		hash, _ := pkg.RandHexString(64)
+		salt := "salt"
+		hash := "hash"
 
-		_ = Db.Get(&id, "INSERT INTO users(email, username, display_name, salt, hash) VALUES($1, $2, $3, $4, $5) RETURNING id", email, username, username, salt, hash)
+		result, _ := Db.Query(
+			context.TODO(),
+			"INSERT INTO users(email, username, display_name, salt, hash) VALUES($1, $2, $3, $4, $5) RETURNING id",
+			email, username, username, salt, hash,
+		)
+		id := result[0]["id"].(int64)
 
-		provider := pkg.EncryptionProvider{}
-		token, _ := provider.CreateJwt(map[string]interface{}{"id": id}, Config.JwtSecret)
+		token, _ := jwt.CreateJwt(map[string]interface{}{"id": id}, Config.JwtSecret)
 
 		client := &http.Client{}
 		req, _ := http.NewRequest("GET", endpoint, nil)
@@ -52,11 +55,11 @@ func TestGetMe(t *testing.T) {
 		var body map[string]interface{}
 		_ = json.Unmarshal(bodyRay, &body)
 
-		var actualData userservice.User
+		var actualData authservice.User
 		_ = mapstructure.Decode(body["data"], &actualData)
 
-		expectedData := userservice.User{
-			Id:          id,
+		expectedData := authservice.User{
+			Id:          int(id),
 			Email:       email,
 			Username:    username,
 			DisplayName: username,

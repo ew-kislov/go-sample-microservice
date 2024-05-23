@@ -1,4 +1,4 @@
-package pkg
+package api
 
 type ApiError struct {
 	Code    int16

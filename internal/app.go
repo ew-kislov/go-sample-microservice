@@ -7,14 +7,15 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/ew-kislov/go-sample-microservice/pkg"
+	"github.com/ew-kislov/go-sample-microservice/pkg/api"
+	"github.com/ew-kislov/go-sample-microservice/pkg/cfg"
 	"github.com/ew-kislov/go-sample-microservice/pkg/db"
+	"github.com/ew-kislov/go-sample-microservice/pkg/logger"
 	"github.com/gin-gonic/gin"
 
 	jwtmiddleware "github.com/ew-kislov/go-sample-microservice/internal/api/middleware/jwt_middleware"
 	userrepository "github.com/ew-kislov/go-sample-microservice/internal/repository/user_repository"
 	authservice "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service"
-	userservice "github.com/ew-kislov/go-sample-microservice/internal/service/user_service"
 
 	getmecontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/get_me_controller"
 	signupcontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/sign_up_controller"
@@ -25,28 +26,25 @@ func StartApp(configPath string) {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 	defer cancel()
 
-	config := pkg.ParseConfig(configPath)
-	logger := pkg.CreateLogger(config)
+	config := cfg.ParseConfig(configPath)
+	logger := logger.CreateLogger(config)
 	db := db.CreateDatabase(&config, logger)
 
 	defer db.Close()
 
-	encryptionProvider := pkg.EncryptionProvider{}
-
 	userRepository := userrepository.NewUserRepository(db)
 
-	userService := userservice.NewUserService(userRepository, encryptionProvider)
-	authService := authservice.NewAuthService(config, encryptionProvider, userService)
+	authService := authservice.NewAuthService(config, userRepository)
 
 	jwtMiddleware := jwtmiddleware.NewJwtMiddleware(authService)
-	loggerMiddleware := pkg.LoggerMiddleware{Logger: logger}
-	requestIdMiddleware := pkg.RequestIdMiddleware{}
+	loggerMiddleware := api.LoggerMiddleware{Logger: logger}
+	requestIdMiddleware := api.RequestIdMiddleware{}
 
 	signUpController := signupcontroller.NewSignUpController(authService)
 	getMeController := getmecontroller.NewGetMeController()
 	statusController := statuscontroller.NewStatusController()
 
-	if config.Env == pkg.Production {
+	if config.Env == cfg.Production {
 		gin.SetMode(gin.ReleaseMode)
 	} else {
 		gin.SetMode(gin.DebugMode)

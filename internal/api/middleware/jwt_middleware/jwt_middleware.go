@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	authservice "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service"
-	"github.com/ew-kislov/go-sample-microservice/pkg"
+	"github.com/ew-kislov/go-sample-microservice/pkg/api"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,12 +34,12 @@ func (middleware *jwtMiddleware) CheckJwt(ctx *gin.Context) {
 
 func extractBearerToken(header string) (string, error) {
 	if header == "" {
-		return "", pkg.ApiError{Code: http.StatusUnauthorized, Message: TokenNotProvided}
+		return "", api.ApiError{Code: http.StatusUnauthorized, Message: TokenNotProvided}
 	}
 
 	jwtToken := strings.Split(header, " ")
 	if len(jwtToken) != 2 || jwtToken[0] != "Bearer" {
-		return "", pkg.ApiError{Code: http.StatusUnauthorized, Message: WrongTokenFormat}
+		return "", api.ApiError{Code: http.StatusUnauthorized, Message: WrongTokenFormat}
 	}
 
 	return jwtToken[1], nil

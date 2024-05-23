@@ -7,9 +7,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	authservice_mocks "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service/mocks"
-	userservice "github.com/ew-kislov/go-sample-microservice/internal/service/user_service"
-	"github.com/ew-kislov/go-sample-microservice/pkg"
+	authservice "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service"
+	authservicemocks "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service/mocks"
+	"github.com/ew-kislov/go-sample-microservice/pkg/api"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -27,7 +27,7 @@ func TestJwtMiddleware(t *testing.T) {
 		ctx, _ := gin.CreateTestContext(w)
 		ctx.Request, _ = http.NewRequest(http.MethodGet, "/", nil)
 
-		mockAuthService := authservice_mocks.NewMockAuthService(ctrl)
+		mockAuthService := authservicemocks.NewMockAuthService(ctrl)
 
 		middleware := NewJwtMiddleware(mockAuthService)
 		middleware.CheckJwt(ctx)
@@ -46,7 +46,7 @@ func TestJwtMiddleware(t *testing.T) {
 		ctx.Request, _ = http.NewRequest(http.MethodGet, "/", nil)
 		ctx.Request.Header.Set("Authorization", "oops")
 
-		mockAuthService := authservice_mocks.NewMockAuthService(ctrl)
+		mockAuthService := authservicemocks.NewMockAuthService(ctrl)
 
 		middleware := NewJwtMiddleware(mockAuthService)
 		middleware.CheckJwt(ctx)
@@ -68,8 +68,8 @@ func TestJwtMiddleware(t *testing.T) {
 		ctx.Request, _ = http.NewRequest(http.MethodGet, "/", nil)
 		ctx.Request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
-		mockAuthService := authservice_mocks.NewMockAuthService(ctrl)
-		mockAuthService.EXPECT().Authenticate(ctx, token).Return(nil, pkg.ApiError{Code: http.StatusUnauthorized, Message: err})
+		mockAuthService := authservicemocks.NewMockAuthService(ctrl)
+		mockAuthService.EXPECT().Authenticate(ctx, token).Return(nil, api.ApiError{Code: http.StatusUnauthorized, Message: err})
 
 		middleware := NewJwtMiddleware(mockAuthService)
 		middleware.CheckJwt(ctx)
@@ -84,14 +84,14 @@ func TestJwtMiddleware(t *testing.T) {
 
 	t.Run("Successfully puts user into context", func(t *testing.T) {
 		token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAwMDAzMH0.kNsEmNWbp_bual4uKnuimu0_DA5NrATcKVmeVM4f9vI"
-		user := &userservice.User{Id: 1, Username: "username", DisplayName: "Display Name", Email: "email@domain.com"}
+		user := &authservice.User{Id: 1, Username: "username", DisplayName: "Display Name", Email: "email@domain.com"}
 
 		w := httptest.NewRecorder()
 		ctx, _ := gin.CreateTestContext(w)
 		ctx.Request, _ = http.NewRequest(http.MethodGet, "/", nil)
 		ctx.Request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
-		mockAuthService := authservice_mocks.NewMockAuthService(ctrl)
+		mockAuthService := authservicemocks.NewMockAuthService(ctrl)
 		mockAuthService.EXPECT().Authenticate(ctx, token).Return(user, nil)
 
 		middleware := NewJwtMiddleware(mockAuthService)

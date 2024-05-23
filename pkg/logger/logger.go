@@ -1,8 +1,9 @@
-package pkg
+package logger
 
 import (
 	"os"
 
+	"github.com/ew-kislov/go-sample-microservice/pkg/cfg"
 	"github.com/sirupsen/logrus"
 )
 
@@ -24,7 +25,7 @@ func (hook *ContextHook) Fire(entry *logrus.Entry) error {
 	return nil
 }
 
-func CreateLogger(config Config) *logrus.Logger {
+func CreateLogger(config cfg.Config) *logrus.Logger {
 	logger := logrus.New()
 
 	logger.SetFormatter(&logrus.TextFormatter{
@@ -33,7 +34,7 @@ func CreateLogger(config Config) *logrus.Logger {
 	})
 	logger.SetOutput(os.Stdout)
 
-	if config.Env == Production {
+	if config.Env == cfg.Production {
 		logger.SetLevel(logrus.InfoLevel)
 	} else {
 		logger.SetLevel(logrus.DebugLevel)

@@ -8,20 +8,21 @@ import (
 	"time"
 
 	"github.com/ew-kislov/go-sample-microservice/internal"
-	"github.com/ew-kislov/go-sample-microservice/pkg"
-	"github.com/jmoiron/sqlx"
+	"github.com/ew-kislov/go-sample-microservice/pkg/cfg"
+	"github.com/ew-kislov/go-sample-microservice/pkg/db"
+	"github.com/ew-kislov/go-sample-microservice/pkg/logger"
 )
 
 var (
-	Config pkg.Config
-	Db     *sqlx.DB
+	Config cfg.Config
+	Db     db.Database
 )
 
 func TestMain(m *testing.M) {
-	go internal.StartApp("../../.env.test")
+	go internal.StartApp("../.env.test")
 
-	Config = pkg.ParseConfig("../../.env.test")
-	Db = pkg.CreateDatabase(Config)
+	Config = cfg.ParseConfig("../.env.test")
+	Db = db.CreateDatabase(&Config, logger.CreateLogger(Config))
 
 	waitServer()
 

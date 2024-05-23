@@ -6,13 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ew-kislov/go-sample-microservice/pkg"
+	"github.com/ew-kislov/go-sample-microservice/pkg/cfg"
 	"github.com/lib/pq"
-	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
 
-func CreateDatabase(config *pkg.Config, logger *logrus.Logger) Database {
+func CreateDatabase(config *cfg.Config, logger *logrus.Logger) Database {
 	return &database{
 		db:     connectDb(*config),
 		logger: logger,
@@ -59,7 +58,7 @@ func (d *database) Close() {
 	d.db.Close()
 }
 
-func (d *database) query(ctx context.Context, query string, params ...interface{}) (QueryResult, error) {
+func (d *database) query(_ context.Context, query string, params ...interface{}) (QueryResult, error) {
 	rows, err := d.db.Query(query, params...)
 
 	if err == nil {
@@ -69,7 +68,7 @@ func (d *database) query(ctx context.Context, query string, params ...interface{
 	}
 }
 
-func (d *database) exec(ctx context.Context, query string, params ...interface{}) (*ExecResult, error) {
+func (d *database) exec(_ context.Context, query string, params ...interface{}) (*ExecResult, error) {
 	result, err := d.db.Exec(query, params)
 
 	if err != nil {
@@ -137,7 +136,7 @@ func (*database) mapRowsToMap(rows *sql.Rows) ([]map[string]interface{}, error) 
 	return results, nil
 }
 
-func connectDb(config pkg.Config) *sql.DB {
+func connectDb(config cfg.Config) *sql.DB {
 	dsn := fmt.Sprintf(
 		"user=%s dbname=%s sslmode=disable password=%s host=%s",
 		config.DatabaseUser, config.DatabaseName, config.DatabasePassword, config.DatabaseHost,

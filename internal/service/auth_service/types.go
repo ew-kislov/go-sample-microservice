@@ -3,9 +3,8 @@ package authservice
 import (
 	"context"
 
-	userservice "github.com/ew-kislov/go-sample-microservice/internal/service/user_service"
-
-	"github.com/ew-kislov/go-sample-microservice/pkg"
+	userrepository "github.com/ew-kislov/go-sample-microservice/internal/repository/user_repository"
+	"github.com/ew-kislov/go-sample-microservice/pkg/cfg"
 )
 
 type TokenPayload struct {
@@ -17,13 +16,26 @@ type SignUpResponse struct {
 	Token  string `json:"token"`
 }
 
+type SignUpParams struct {
+	Email       string
+	Username    string
+	DisplayName string
+	Password    string
+}
+
+type User struct {
+	Id          int
+	Email       string
+	Username    string
+	DisplayName string
+}
+
 type AuthService interface {
-	SignUp(ctx context.Context, params userservice.CreateUserParams) (*SignUpResponse, error)
-	Authenticate(ctx context.Context, token string) (*userservice.User, error)
+	SignUp(ctx context.Context, params SignUpParams) (*SignUpResponse, error)
+	Authenticate(ctx context.Context, token string) (*User, error)
 }
 
 type authService struct {
-	config             pkg.Config
-	encryptionProvider pkg.EncryptionProvider
-	userService        userservice.UserService
+	config         cfg.Config
+	userRepository userrepository.UserRepository
 }

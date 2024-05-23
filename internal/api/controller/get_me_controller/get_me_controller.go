@@ -3,14 +3,13 @@ package getmecontroller
 import (
 	"net/http"
 
+	authservice "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service"
 	"github.com/gin-gonic/gin"
-
-	userservice "github.com/ew-kislov/go-sample-microservice/internal/service/user_service"
 )
 
 func (controller *getMeController) GetMe(ctx *gin.Context) {
 	userUntyped, _ := ctx.Get("user")
-	user, _ := userUntyped.(*userservice.User)
+	user, _ := userUntyped.(*authservice.User)
 
 	userResponse := UserResponse{
 		Id:          user.Id,
