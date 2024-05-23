@@ -4,28 +4,26 @@ import (
 	"context"
 	"time"
 
-	"github.com/ew-kislov/go-sample-microservice/pkg"
-
-	"github.com/jmoiron/sqlx"
+	"github.com/ew-kislov/go-sample-microservice/pkg/db"
 )
 
 type CreateUserParams struct {
-	Email       string `db:"email"`
-	Username    string `db:"username"`
-	DisplayName string `db:"display_name"`
-	Salt        string `db:"salt"`
-	Hash        string `db:"hash"`
+	Email       string
+	Username    string
+	DisplayName string
+	Salt        string
+	Hash        string
 }
 
 type User struct {
-	Id          int       `db:"id"`
-	Email       string    `db:"email"`
-	Username    string    `db:"username"`
-	DisplayName string    `db:"display_name"`
-	Salt        string    `db:"salt"`
-	Hash        string    `db:"hash"`
-	CreatedAt   time.Time `db:"created_at"`
-	UpdatedAt   time.Time `db:"updated_at"`
+	Id          int       `mapstructure:"id"`
+	Email       string    `mapstructure:"email"`
+	Username    string    `mapstructure:"username"`
+	DisplayName string    `mapstructure:"display_name"`
+	Salt        string    `mapstructure:"salt"`
+	Hash        string    `mapstructure:"hash"`
+	CreatedAt   time.Time `mapstructure:"created_at"`
+	UpdatedAt   time.Time `mapstructure:"updated_at"`
 }
 
 type UserRepository interface {
@@ -34,10 +32,9 @@ type UserRepository interface {
 }
 
 type userRepository struct {
-	Db             *sqlx.DB
-	BaseRepository pkg.BaseRepository
+	db db.Database
 }
 
-func NewUserRepository(db *sqlx.DB, baseRepository pkg.BaseRepository) UserRepository {
-	return &userRepository{Db: db, BaseRepository: baseRepository}
+func NewUserRepository(db db.Database) UserRepository {
+	return &userRepository{db}
 }

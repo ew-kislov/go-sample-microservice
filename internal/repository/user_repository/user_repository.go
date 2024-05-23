@@ -2,28 +2,44 @@ package userrepository
 
 import (
 	"context"
+	"errors"
 
-	"github.com/ew-kislov/go-sample-microservice/pkg"
+	"github.com/mitchellh/mapstructure"
 )
 
 func (ur *userRepository) Create(ctx context.Context, params CreateUserParams) (int64, error) {
-	return ur.BaseRepository.Insert(
+	result, err := ur.db.Query(
 		ctx,
-		pkg.InsertParams{
-			Table:   "users",
-			Columns: []string{"email", "username", "display_name", "salt", "hash"},
-			Data:    params,
-		},
+		"INSERT INTO users(email, username, display_name, salt, hash) values ($1, $2, $3, $4, $5) RETURNING id",
+		params.Email, params.Username, params.DisplayName, params.Salt, params.Hash,
 	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	id, ok := result[0]["id"].(int64)
+
+	if !ok {
+		return 0, errors.New("could not get created it from result set")
+	}
+
+	return id, err
 }
 
 func (ur *userRepository) GetById(ctx context.Context, id int64) (*User, error) {
-	user := User{}
-
-	err := ur.BaseRepository.SelectById(ctx, pkg.SelectByIdParams{Table: "users", Id: id}, &user)
+	result, err := ur.db.Query(ctx, "SELECT * from users WHERE id = $1", id)
 
 	if err != nil {
 		return nil, err
+	}
+
+	var user User
+
+	err = mapstructure.Decode(result[0], &user)
+
+	if err != nil {
+		return nil, errors.New("could not decode result set to User type")
 	}
 
 	return &user, nil

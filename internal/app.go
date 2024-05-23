@@ -7,16 +7,18 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/ew-kislov/go-sample-microservice/pkg"
+	"github.com/ew-kislov/go-sample-microservice/pkg/db"
 	"github.com/gin-gonic/gin"
 
-	getmecontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/get_me_controller"
-	signupcontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/sign_up_controller"
-	statuscontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/status_controller"
 	jwtmiddleware "github.com/ew-kislov/go-sample-microservice/internal/api/middleware/jwt_middleware"
 	userrepository "github.com/ew-kislov/go-sample-microservice/internal/repository/user_repository"
 	authservice "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service"
 	userservice "github.com/ew-kislov/go-sample-microservice/internal/service/user_service"
-	"github.com/ew-kislov/go-sample-microservice/pkg"
+
+	getmecontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/get_me_controller"
+	signupcontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/sign_up_controller"
+	statuscontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/status_controller"
 )
 
 func StartApp(configPath string) {
@@ -25,14 +27,13 @@ func StartApp(configPath string) {
 
 	config := pkg.ParseConfig(configPath)
 	logger := pkg.CreateLogger(config)
-	db := pkg.CreateDatabase(config)
+	db := db.CreateDatabase(&config, logger)
 
 	defer db.Close()
 
-	baseRepository := pkg.BaseRepository{Db: db, Logger: logger}
 	encryptionProvider := pkg.EncryptionProvider{}
 
-	userRepository := userrepository.NewUserRepository(db, baseRepository)
+	userRepository := userrepository.NewUserRepository(db)
 
 	userService := userservice.NewUserService(userRepository, encryptionProvider)
 	authService := authservice.NewAuthService(config, encryptionProvider, userService)
