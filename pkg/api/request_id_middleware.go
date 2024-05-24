@@ -11,8 +11,11 @@ func RequestIdMiddleware() gin.HandlerFunc {
 
 		if requestId != "" {
 			ctx.Set("requestId", requestId)
+			ctx.Writer.Header().Set("x-request-id", requestId)
 		} else {
-			ctx.Set("requestId", uuid.New().String())
+			requestId := uuid.New().String()
+			ctx.Set("requestId", requestId)
+			ctx.Writer.Header().Set("x-request-id", requestId)
 		}
 
 		ctx.Next()

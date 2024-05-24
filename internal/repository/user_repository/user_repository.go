@@ -21,7 +21,7 @@ func (ur *userRepository) Create(ctx context.Context, params CreateUserParams) (
 	id, ok := result[0]["id"].(int64)
 
 	if !ok {
-		return 0, errors.New("could not get created it from result set")
+		return 0, errors.New("could not get created id from result set")
 	}
 
 	return id, err
