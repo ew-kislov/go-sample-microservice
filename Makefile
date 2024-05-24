@@ -19,6 +19,9 @@ test_unit:
 test_integration:
 	go test ./test/...
 
+build_swagger:
+	swag init -g ./internal/app.go -o ./docs
+
 create_migration:
 	migrate create -ext=sql -dir=migrations -seq init
 

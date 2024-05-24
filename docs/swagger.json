@@ -1,0 +1,54 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Sample microservice.",
+        "title": "Sample microservice API",
+        "contact": {}
+    },
+    "basePath": "/api/v1",
+    "paths": {
+        "/internal/status": {
+            "get": {
+                "description": "Get app status",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Internal"
+                ],
+                "summary": "Get status",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/statuscontroller.StatusResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "statuscontroller.StatusResponse": {
+            "type": "object",
+            "properties": {
+                "buildDate": {
+                    "type": "string"
+                },
+                "commit": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

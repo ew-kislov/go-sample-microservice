@@ -7,6 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetStatus		  godoc
+// @Summary			  Get status
+// @Description		Get app status
+// @Produce			  application/json
+// @Tags			    Internal
+// @Success			  200 {object} StatusResponse
+// @Router			  /internal/status [get]
 func (controller *statusController) GetStatus(ctx *gin.Context) {
 	response := StatusResponse{
 		Version:    version.Version,

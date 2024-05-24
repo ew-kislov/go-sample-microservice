@@ -7,11 +7,16 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/ew-kislov/go-sample-microservice/docs"
 	"github.com/ew-kislov/go-sample-microservice/pkg/api"
 	"github.com/ew-kislov/go-sample-microservice/pkg/cfg"
 	"github.com/ew-kislov/go-sample-microservice/pkg/db"
 	"github.com/ew-kislov/go-sample-microservice/pkg/logger"
+	"github.com/ew-kislov/go-sample-microservice/pkg/version"
 	"github.com/gin-gonic/gin"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	jwtmiddleware "github.com/ew-kislov/go-sample-microservice/internal/api/middleware/jwt_middleware"
 	userrepository "github.com/ew-kislov/go-sample-microservice/internal/repository/user_repository"
@@ -22,6 +27,14 @@ import (
 	statuscontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/status_controller"
 )
 
+// @title           Sample microservice API
+// @description     Sample microservice.
+
+// @BasePath  /api/v1
+
+// @securityDefinitions.apiKey  BearerAuth
+// @in header
+// @name Authorization
 func StartApp(configPath string) {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 	defer cancel()
@@ -54,16 +67,24 @@ func StartApp(configPath string) {
 	router.Use(api.RequestIdMiddleware())
 	router.Use(api.LoggerMiddleware(logger))
 
-	public := router.Group("/")
+	v1 := router.Group("/api/v1")
 	{
-		public.POST("/auth/sign-up", signUpController.SignUp)
-		public.GET("/auth/me", jwtMiddleware.CheckJwt, getMeController.GetMe)
+		public := v1.Group("/auth")
+		{
+			public.POST("/sign-up", signUpController.SignUp)
+			public.GET("/me", jwtMiddleware.CheckJwt, getMeController.GetMe)
+		}
+
+		internal := v1.Group("/internal")
+		{
+			internal.GET("/status", statusController.GetStatus)
+		}
 	}
 
-	internal := router.Group("/internal")
-	{
-		internal.GET("/status", statusController.GetStatus)
-	}
+	docs.SwaggerInfo.Version = version.Version
+	docs.SwaggerInfo.Host = fmt.Sprintf("localhost:%d", config.ServerPort)
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.ServerPort),

@@ -1,0 +1,35 @@
+basePath: /api/v1
+definitions:
+  statuscontroller.StatusResponse:
+    properties:
+      buildDate:
+        type: string
+      commit:
+        type: string
+      version:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Sample microservice.
+  title: Sample microservice API
+paths:
+  /internal/status:
+    get:
+      description: Get app status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/statuscontroller.StatusResponse'
+      summary: Get status
+      tags:
+      - Internal
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
