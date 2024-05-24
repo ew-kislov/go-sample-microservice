@@ -37,8 +37,6 @@ func StartApp(configPath string) {
 	authService := authservice.NewAuthService(config, userRepository)
 
 	jwtMiddleware := jwtmiddleware.NewJwtMiddleware(authService)
-	loggerMiddleware := api.LoggerMiddleware{Logger: logger}
-	requestIdMiddleware := api.RequestIdMiddleware{}
 
 	signUpController := signupcontroller.NewSignUpController(authService)
 	getMeController := getmecontroller.NewGetMeController()
@@ -53,8 +51,8 @@ func StartApp(configPath string) {
 	router := gin.New()
 
 	router.Use(gin.Recovery())
-	router.Use(requestIdMiddleware.AddRequestId)
-	router.Use(loggerMiddleware.Log)
+	router.Use(api.RequestIdMiddleware())
+	router.Use(api.LoggerMiddleware(logger))
 
 	public := router.Group("/")
 	{

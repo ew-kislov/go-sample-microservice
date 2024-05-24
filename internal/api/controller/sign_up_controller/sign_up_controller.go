@@ -16,7 +16,7 @@ func (controller *signUpController) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	response, err := controller.AuthService.SignUp(ctx, authservice.SignUpParams(body))
+	response, err := controller.authService.SignUp(ctx, authservice.SignUpParams(body))
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})

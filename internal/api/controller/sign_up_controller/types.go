@@ -14,7 +14,7 @@ type SignUpRequest struct {
 }
 
 type signUpController struct {
-	AuthService authservice.AuthService
+	authService authservice.AuthService
 }
 
 type SignUpController interface {
@@ -22,5 +22,5 @@ type SignUpController interface {
 }
 
 func NewSignUpController(authService authservice.AuthService) SignUpController {
-	return &signUpController{AuthService: authService}
+	return &signUpController{authService}
 }
