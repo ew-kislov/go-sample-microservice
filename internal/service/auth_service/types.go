@@ -12,8 +12,8 @@ type TokenPayload struct {
 }
 
 type SignUpResponse struct {
-	UserId int64  `json:"userId"`
-	Token  string `json:"token"`
+	UserId int64
+	Token  string
 }
 
 type SignUpParams struct {

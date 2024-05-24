@@ -1,7 +1,7 @@
 package api
 
 type ApiError struct {
-	Code    int16
+	Code    int
 	Message string
 }
 

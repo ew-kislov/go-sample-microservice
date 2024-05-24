@@ -13,6 +13,11 @@ type SignUpRequest struct {
 	Password    string `json:"password" binding:"required"`
 }
 
+type SignUpResponse struct {
+	UserId int64  `json:"userId"`
+	Token  string `json:"token"`
+}
+
 type signUpController struct {
 	authService authservice.AuthService
 }

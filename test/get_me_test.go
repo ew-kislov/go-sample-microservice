@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"testing"
 
-	authservice "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service"
+	getmecontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/get_me_controller"
 	"github.com/ew-kislov/go-sample-microservice/pkg/jwt"
 	"github.com/google/uuid"
 	"github.com/mitchellh/mapstructure"
@@ -16,7 +16,7 @@ import (
 )
 
 func TestGetMe(t *testing.T) {
-	endpoint := fmt.Sprintf("http://localhost:%d/auth/me", Config.ServerPort)
+	endpoint := fmt.Sprintf("http://localhost:%d/api/v1/auth/me", Config.ServerPort)
 
 	t.Run("Throws error 401 if token was not provided", func(t *testing.T) {
 		resp, _ := http.Get(endpoint)
@@ -26,7 +26,6 @@ func TestGetMe(t *testing.T) {
 		_ = json.Unmarshal(bodyRay, &body)
 
 		assert.Equal(t, resp.StatusCode, http.StatusUnauthorized)
-		assert.Equal(t, body["success"], false)
 	})
 
 	t.Run("Returns user", func(t *testing.T) {
@@ -49,16 +48,15 @@ func TestGetMe(t *testing.T) {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
 		resp, _ := client.Do(req)
-
-		bodyRay, _ := io.ReadAll(resp.Body)
+		bodyRaw, _ := io.ReadAll(resp.Body)
 
 		var body map[string]interface{}
-		_ = json.Unmarshal(bodyRay, &body)
+		_ = json.Unmarshal(bodyRaw, &body)
 
-		var actualData authservice.User
-		_ = mapstructure.Decode(body["data"], &actualData)
+		var actualData getmecontroller.UserResponse
+		_ = mapstructure.Decode(body, &actualData)
 
-		expectedData := authservice.User{
+		expectedData := getmecontroller.UserResponse{
 			Id:          int(id),
 			Email:       email,
 			Username:    username,

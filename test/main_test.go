@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 	go internal.StartApp("../.env.test")
 
 	Config = cfg.ParseConfig("../.env.test")
-	Db = db.CreateDatabase(&Config, logger.CreateLogger(Config))
+	Db = db.CreateDatabase(Config, logger.CreateLogger(Config))
 
 	waitServer()
 
@@ -43,7 +43,7 @@ func waitServer() {
 		case <-ctx.Done():
 			panic("Server timed out")
 		case <-ticker.C:
-			resp, err := http.Get(fmt.Sprintf("http://localhost:%d/internal/status", Config.ServerPort))
+			resp, err := http.Get(fmt.Sprintf("http://localhost:%d/api/v1/internal/status", Config.ServerPort))
 			if err == nil && resp.StatusCode == http.StatusOK {
 				return
 			}

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	authservice "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service"
+	"github.com/ew-kislov/go-sample-microservice/pkg/api"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,15 +13,15 @@ func (controller *signUpController) SignUp(ctx *gin.Context) {
 	var body SignUpRequest
 
 	if err := ctx.ShouldBindJSON(&body); err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		ctx.Error(api.ApiError{Code: http.StatusUnprocessableEntity, Message: "Could not parse body"})
 		return
 	}
 
 	response, err := controller.authService.SignUp(ctx, authservice.SignUpParams(body))
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
+		ctx.Error(err)
 	} else {
-		ctx.JSON(http.StatusCreated, gin.H{"success": true, "data": response})
+		ctx.JSON(http.StatusCreated, SignUpResponse(*response))
 	}
 }

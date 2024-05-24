@@ -41,7 +41,7 @@ func StartApp(configPath string) {
 
 	config := cfg.ParseConfig(configPath)
 	logger := logger.CreateLogger(config)
-	db := db.CreateDatabase(&config, logger)
+	db := db.CreateDatabase(config, logger)
 
 	defer db.Close()
 
@@ -49,7 +49,7 @@ func StartApp(configPath string) {
 
 	authService := authservice.NewAuthService(config, userRepository)
 
-	jwtMiddleware := jwtmiddleware.NewJwtMiddleware(authService)
+	jwtMiddleware := jwtmiddleware.JwtMiddleware(authService, config)
 
 	signUpController := signupcontroller.NewSignUpController(authService)
 	getMeController := getmecontroller.NewGetMeController()
@@ -66,13 +66,14 @@ func StartApp(configPath string) {
 	router.Use(gin.Recovery())
 	router.Use(api.RequestIdMiddleware())
 	router.Use(api.LoggerMiddleware(logger))
+	router.Use(api.ErrorHandlerMiddleware(config))
 
 	v1 := router.Group("/api/v1")
 	{
 		public := v1.Group("/auth")
 		{
 			public.POST("/sign-up", signUpController.SignUp)
-			public.GET("/me", jwtMiddleware.CheckJwt, getMeController.GetMe)
+			public.GET("/me", jwtMiddleware, getMeController.GetMe)
 		}
 
 		internal := v1.Group("/internal")

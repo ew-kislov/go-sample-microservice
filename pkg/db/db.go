@@ -11,9 +11,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func CreateDatabase(config *cfg.Config, logger *logrus.Logger) Database {
+func CreateDatabase(config cfg.Config, logger *logrus.Logger) Database {
 	return &database{
-		db:     connectDb(*config),
+		db:     connectDb(config),
 		logger: logger,
 	}
 }

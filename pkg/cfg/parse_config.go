@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	Production  = "Production"
-	Development = "Development"
+	Production  = "production"
+	Development = "development"
 )
 
 type Config struct {

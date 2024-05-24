@@ -18,5 +18,5 @@ func (controller *getMeController) GetMe(ctx *gin.Context) {
 		Username:    user.Username,
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"success": true, "data": userResponse})
+	ctx.JSON(http.StatusOK, userResponse)
 }

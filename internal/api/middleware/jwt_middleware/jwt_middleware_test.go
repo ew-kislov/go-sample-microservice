@@ -10,6 +10,7 @@ import (
 	authservice "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service"
 	authservicemocks "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service/mocks"
 	"github.com/ew-kislov/go-sample-microservice/pkg/api"
+	"github.com/ew-kislov/go-sample-microservice/pkg/cfg"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -28,16 +29,16 @@ func TestJwtMiddleware(t *testing.T) {
 		ctx.Request, _ = http.NewRequest(http.MethodGet, "/", nil)
 
 		mockAuthService := authservicemocks.NewMockAuthService(ctrl)
+		mockConfig := cfg.Config{Env: cfg.Production}
 
-		middleware := NewJwtMiddleware(mockAuthService)
-		middleware.CheckJwt(ctx)
+		middleware := JwtMiddleware(mockAuthService, mockConfig)
+		middleware(ctx)
 
 		var response map[string]interface{}
 		_ = json.Unmarshal(w.Body.Bytes(), &response)
 
 		assert.Equal(t, w.Code, http.StatusUnauthorized)
-		assert.Equal(t, response["success"], false)
-		assert.Equal(t, response["message"], TokenNotProvided)
+		assert.Equal(t, response["error"], TokenNotProvided)
 	})
 
 	t.Run("Fails if Authorization header does not have format `Bearer <token>`", func(t *testing.T) {
@@ -47,16 +48,16 @@ func TestJwtMiddleware(t *testing.T) {
 		ctx.Request.Header.Set("Authorization", "oops")
 
 		mockAuthService := authservicemocks.NewMockAuthService(ctrl)
+		mockConfig := cfg.Config{Env: cfg.Production}
 
-		middleware := NewJwtMiddleware(mockAuthService)
-		middleware.CheckJwt(ctx)
+		middleware := JwtMiddleware(mockAuthService, mockConfig)
+		middleware(ctx)
 
 		var response map[string]interface{}
 		_ = json.Unmarshal(w.Body.Bytes(), &response)
 
 		assert.Equal(t, w.Code, http.StatusUnauthorized)
-		assert.Equal(t, response["success"], false)
-		assert.Equal(t, response["message"], WrongTokenFormat)
+		assert.Equal(t, response["error"], WrongTokenFormat)
 	})
 
 	t.Run("Fails if AuthService call fails", func(t *testing.T) {
@@ -71,15 +72,16 @@ func TestJwtMiddleware(t *testing.T) {
 		mockAuthService := authservicemocks.NewMockAuthService(ctrl)
 		mockAuthService.EXPECT().Authenticate(ctx, token).Return(nil, api.ApiError{Code: http.StatusUnauthorized, Message: err})
 
-		middleware := NewJwtMiddleware(mockAuthService)
-		middleware.CheckJwt(ctx)
+		mockConfig := cfg.Config{Env: cfg.Production}
+
+		middleware := JwtMiddleware(mockAuthService, mockConfig)
+		middleware(ctx)
 
 		var response map[string]interface{}
 		_ = json.Unmarshal(w.Body.Bytes(), &response)
 
 		assert.Equal(t, w.Code, http.StatusUnauthorized)
-		assert.Equal(t, response["success"], false)
-		assert.Equal(t, response["message"], err)
+		assert.Equal(t, response["error"], err)
 	})
 
 	t.Run("Successfully puts user into context", func(t *testing.T) {
@@ -94,8 +96,10 @@ func TestJwtMiddleware(t *testing.T) {
 		mockAuthService := authservicemocks.NewMockAuthService(ctrl)
 		mockAuthService.EXPECT().Authenticate(ctx, token).Return(user, nil)
 
-		middleware := NewJwtMiddleware(mockAuthService)
-		middleware.CheckJwt(ctx)
+		mockConfig := cfg.Config{Env: cfg.Production}
+
+		middleware := JwtMiddleware(mockAuthService, mockConfig)
+		middleware(ctx)
 
 		contextUser, _ := ctx.Get("user")
 
