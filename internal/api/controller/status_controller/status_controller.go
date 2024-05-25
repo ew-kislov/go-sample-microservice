@@ -7,12 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetStatus		  godoc
+// GetStatus godoc
+//
 // @Summary			  Get status
-// @Description		Get app status
+// @Accept			  application/json
 // @Produce			  application/json
 // @Tags			    Internal
 // @Success			  200 {object} StatusResponse
+// @Failure       500 {object} api.ErrorResponse
 // @Router			  /internal/status [get]
 func (controller *statusController) GetStatus(ctx *gin.Context) {
 	response := StatusResponse{
@@ -21,5 +23,5 @@ func (controller *statusController) GetStatus(ctx *gin.Context) {
 		BbuildDate: version.BuildDate,
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"success": true, "data": response})
+	ctx.JSON(http.StatusOK, response)
 }
