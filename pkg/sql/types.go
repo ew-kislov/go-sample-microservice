@@ -7,20 +7,20 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type DatabaseErrorType int8
+type ErrorType int8
 
 const (
-	DuplicateError DatabaseErrorType = iota
+	DuplicateError ErrorType = iota
 	NotFound
 	MappingError
 )
 
-type DatabaseError struct {
-	Type    DatabaseErrorType
+type Error struct {
+	Type    ErrorType
 	Message string
 }
 
-func (err DatabaseError) Error() string {
+func (err Error) Error() string {
 	return err.Message
 }
 

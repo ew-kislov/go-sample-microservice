@@ -97,7 +97,7 @@ func (*database) handleQueryError(err error) error {
 
 	switch pgErr.Code {
 	case "23505":
-		return DatabaseError{Type: DuplicateError, Message: err.Error()}
+		return Error{Type: DuplicateError, Message: err.Error()}
 	}
 
 	return err

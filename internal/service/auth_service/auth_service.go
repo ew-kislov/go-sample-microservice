@@ -42,7 +42,7 @@ func (as *authService) SignUp(ctx context.Context, params SignUpParams) (*SignUp
 		},
 	)
 
-	if databaseError, ok := err.(sql.DatabaseError); ok && databaseError.Type == sql.DuplicateError {
+	if sqlError, ok := err.(sql.Error); ok && sqlError.Type == sql.DuplicateError {
 		return nil, api.Error{
 			Code:    http.StatusConflict,
 			Message: "User with provided email or username already exists",
@@ -87,7 +87,7 @@ func (as *authService) Authenticate(ctx context.Context, token string) (*User, e
 
 	userRaw, err := as.userRepository.GetById(ctx, payload.Id)
 
-	if databaseError, ok := err.(sql.DatabaseError); ok && databaseError.Type == sql.NotFound {
+	if sqlError, ok := err.(sql.Error); ok && sqlError.Type == sql.NotFound {
 		return nil, api.Error{Code: http.StatusNotFound, Message: "User with provided id not found"}
 	} else if err != nil {
 		return nil, err

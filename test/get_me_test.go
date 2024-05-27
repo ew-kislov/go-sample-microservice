@@ -69,5 +69,7 @@ func TestGetMe(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 		assert.Equal(t, expectedData, actualData)
+
+		_, _ = Db.Exec(context.TODO(), "DELETE FROM users WHERE id = $1", id)
 	})
 }
