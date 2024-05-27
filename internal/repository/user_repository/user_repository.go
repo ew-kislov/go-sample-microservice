@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-func (ur *userRepository) Create(ctx context.Context, params CreateUserParams) (int64, error) {
+func (ur *userRepository) Create(ctx context.Context, params *CreateUserParams) (int64, error) {
 	result, err := ur.db.Query(
 		ctx,
 		"INSERT INTO users(email, username, display_name, salt, hash) values ($1, $2, $3, $4, $5) RETURNING id",

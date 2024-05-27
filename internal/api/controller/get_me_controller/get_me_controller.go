@@ -1,6 +1,7 @@
 package getmecontroller
 
 import (
+	"errors"
 	"net/http"
 
 	authservice "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service"
@@ -19,9 +20,14 @@ import (
 // @Failure			  401 {object} api.ErrorResponse
 // @Failure			  404 {object} api.ErrorResponse
 // @Router			  /auth/me [get]
-func (controller *getMeController) GetMe(ctx *gin.Context) {
+func (*getMeController) GetMe(ctx *gin.Context) {
 	userUntyped, _ := ctx.Get("user")
-	user, _ := userUntyped.(*authservice.User)
+	user, ok := userUntyped.(*authservice.User)
+
+	if !ok {
+		_ = ctx.Error(errors.New("Could not cast ctx.user to User type"))
+		return
+	}
 
 	userResponse := UserResponse{
 		Id:          user.Id,

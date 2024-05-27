@@ -6,17 +6,18 @@ import (
 	"net/http"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/ew-kislov/go-sample-microservice/docs"
 	"github.com/ew-kislov/go-sample-microservice/pkg/api"
 	"github.com/ew-kislov/go-sample-microservice/pkg/cfg"
-	"github.com/ew-kislov/go-sample-microservice/pkg/db"
-	"github.com/ew-kislov/go-sample-microservice/pkg/logger"
+	"github.com/ew-kislov/go-sample-microservice/pkg/logging"
+	"github.com/ew-kislov/go-sample-microservice/pkg/sql"
 	"github.com/ew-kislov/go-sample-microservice/pkg/version"
 	"github.com/gin-gonic/gin"
 
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	swaggerfiles "github.com/swaggo/files"
+	ginswagger "github.com/swaggo/gin-swagger"
 
 	jwtmiddleware "github.com/ew-kislov/go-sample-microservice/internal/api/middleware/jwt_middleware"
 	userrepository "github.com/ew-kislov/go-sample-microservice/internal/repository/user_repository"
@@ -40,16 +41,16 @@ func StartApp(configPath string) {
 	defer cancel()
 
 	config := cfg.ParseConfig(configPath)
-	logger := logger.CreateLogger(config)
-	db := db.CreateDatabase(config, logger)
+	logger := logging.CreateLogger(&config)
+	db := sql.CreateDatabase(&config, logger)
 
 	defer db.Close()
 
 	userRepository := userrepository.NewUserRepository(db)
 
-	authService := authservice.NewAuthService(config, userRepository)
+	authService := authservice.NewAuthService(&config, userRepository)
 
-	jwtMiddleware := jwtmiddleware.JwtMiddleware(authService, config)
+	jwtMiddleware := jwtmiddleware.JwtMiddleware(authService, &config)
 
 	signUpController := signupcontroller.NewSignUpController(authService)
 	getMeController := getmecontroller.NewGetMeController()
@@ -66,7 +67,7 @@ func StartApp(configPath string) {
 	router.Use(gin.Recovery())
 	router.Use(api.RequestIdMiddleware())
 	router.Use(api.LoggerMiddleware(logger))
-	router.Use(api.ErrorHandlerMiddleware(config))
+	router.Use(api.ErrorHandlerMiddleware(&config))
 
 	v1 := router.Group("/api/v1")
 	{
@@ -85,11 +86,12 @@ func StartApp(configPath string) {
 	docs.SwaggerInfo.Version = version.Version
 	docs.SwaggerInfo.Host = fmt.Sprintf("localhost:%d", config.ServerPort)
 
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET("/swagger/*any", ginswagger.WrapHandler(swaggerfiles.Handler))
 
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.ServerPort),
-		Handler: router.Handler(),
+		Addr:        fmt.Sprintf(":%d", config.ServerPort),
+		Handler:     router.Handler(),
+		ReadTimeout: time.Minute,
 	}
 
 	go func() {

@@ -36,6 +36,6 @@ type AuthService interface {
 }
 
 type authService struct {
-	config         cfg.Config
+	config         *cfg.Config
 	userRepository userrepository.UserRepository
 }

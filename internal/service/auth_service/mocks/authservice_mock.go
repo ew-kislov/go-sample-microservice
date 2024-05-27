@@ -45,7 +45,7 @@ func (m *MockAuthService) Authenticate(ctx context.Context, token string) (*auth
 }
 
 // Authenticate indicates an expected call of Authenticate.
-func (mr *MockAuthServiceMockRecorder) Authenticate(ctx, token interface{}) *gomock.Call {
+func (mr *MockAuthServiceMockRecorder) Authenticate(ctx, token any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authenticate", reflect.TypeOf((*MockAuthService)(nil).Authenticate), ctx, token)
 }
@@ -60,7 +60,7 @@ func (m *MockAuthService) SignUp(ctx context.Context, params authservice.SignUpP
 }
 
 // SignUp indicates an expected call of SignUp.
-func (mr *MockAuthServiceMockRecorder) SignUp(ctx, params interface{}) *gomock.Call {
+func (mr *MockAuthServiceMockRecorder) SignUp(ctx, params any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignUp", reflect.TypeOf((*MockAuthService)(nil).SignUp), ctx, params)
 }

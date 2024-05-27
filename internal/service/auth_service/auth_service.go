@@ -2,20 +2,21 @@ package authservice
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	userrepository "github.com/ew-kislov/go-sample-microservice/internal/repository/user_repository"
 	"github.com/ew-kislov/go-sample-microservice/pkg/api"
 	"github.com/ew-kislov/go-sample-microservice/pkg/cfg"
-	"github.com/ew-kislov/go-sample-microservice/pkg/db"
 	"github.com/ew-kislov/go-sample-microservice/pkg/encryption"
 	"github.com/ew-kislov/go-sample-microservice/pkg/jwt"
+	"github.com/ew-kislov/go-sample-microservice/pkg/sql"
 
 	"github.com/mitchellh/mapstructure"
 )
 
 func NewAuthService(
-	config cfg.Config,
+	config *cfg.Config,
 	userRepository userrepository.UserRepository,
 ) AuthService {
 	return &authService{config, userRepository}
@@ -32,7 +33,7 @@ func (as *authService) SignUp(ctx context.Context, params SignUpParams) (*SignUp
 
 	id, err := as.userRepository.Create(
 		ctx,
-		userrepository.CreateUserParams{
+		&userrepository.CreateUserParams{
 			Email:       params.Email,
 			DisplayName: params.DisplayName,
 			Username:    params.Username,
@@ -41,17 +42,24 @@ func (as *authService) SignUp(ctx context.Context, params SignUpParams) (*SignUp
 		},
 	)
 
-	if databaseError, ok := err.(db.DatabaseError); ok && databaseError.Type == db.DuplicateError {
-		return nil, api.ApiError{Code: http.StatusConflict, Message: "User with provided email or username already exists"}
+	if databaseError, ok := err.(sql.DatabaseError); ok && databaseError.Type == sql.DuplicateError {
+		return nil, api.Error{
+			Code:    http.StatusConflict,
+			Message: "User with provided email or username already exists",
+		}
 	} else if err != nil {
 		return nil, err
 	}
 
 	payload := TokenPayload{Id: id}
 
-	var payloadMap map[string]interface{}
+	var payloadMap map[string]any
 
-	mapstructure.Decode(payload, &payloadMap)
+	err = mapstructure.Decode(payload, &payloadMap)
+
+	if err != nil {
+		return nil, errors.New("Could not decode map TokenPayload map")
+	}
 
 	token, err := jwt.CreateJwt(payloadMap, as.config.JwtSecret)
 
@@ -66,17 +74,21 @@ func (as *authService) Authenticate(ctx context.Context, token string) (*User, e
 	payloadMap, err := jwt.VerifyJwt(token, as.config.JwtSecret)
 
 	if err != nil {
-		return nil, api.ApiError{Code: http.StatusUnauthorized, Message: "Malformed token"}
+		return nil, api.Error{Code: http.StatusUnauthorized, Message: "Malformed token"}
 	}
 
 	var payload TokenPayload
 
-	mapstructure.Decode(payloadMap, &payload)
+	err = mapstructure.Decode(payloadMap, &payload)
+
+	if err != nil {
+		return nil, errors.New("Could not decode map into TokenPayload")
+	}
 
 	userRaw, err := as.userRepository.GetById(ctx, payload.Id)
 
-	if databaseError, ok := err.(db.DatabaseError); ok && databaseError.Type == db.NotFound {
-		return nil, api.ApiError{Code: http.StatusNotFound, Message: "User with provided id not found"}
+	if databaseError, ok := err.(sql.DatabaseError); ok && databaseError.Type == sql.NotFound {
+		return nil, api.Error{Code: http.StatusNotFound, Message: "User with provided id not found"}
 	} else if err != nil {
 		return nil, err
 	}

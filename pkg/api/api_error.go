@@ -1,10 +1,10 @@
 package api
 
-type ApiError struct {
+type Error struct {
 	Code    int
 	Message string
 }
 
-func (err ApiError) Error() string {
+func (err Error) Error() string {
 	return err.Message
 }

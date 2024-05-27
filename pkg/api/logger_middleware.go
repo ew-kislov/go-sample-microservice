@@ -14,7 +14,12 @@ type copyWriter struct {
 }
 
 func (cw copyWriter) Write(b []byte) (int, error) {
-	cw.body.Write(b)
+	n, err := cw.body.Write(b)
+
+	if err != nil {
+		return n, err
+	}
+
 	return cw.ResponseWriter.Write(b)
 }
 

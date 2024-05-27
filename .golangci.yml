@@ -1,0 +1,86 @@
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+  goconst:
+    min-len: 2
+    min-occurrences: 3
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - unnecessaryBlock
+      - singleCaseSwitch
+  revive:
+    enable-all-rules: true
+    rules:
+      - name: var-naming
+        disabled: true
+      - name: get-return
+        disabled: true
+      - name: line-length-limit
+        arguments: [120]
+      - name: function-length
+        disabled: true
+      - name: cognitive-complexity
+        disabled: true
+      - name: add-constant
+        disabled: true
+      - name: indent-error-flow
+        disabled: true
+      - name: unnecessary-stmt
+        disabled: true
+  gosec:
+    excludes: ["G107"]
+  nolintlint:
+    require-explanation: true
+    require-specific: true
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - dogsled
+    - dupl
+    - errcheck
+    - exportloopref
+    - exhaustive
+    - goconst
+    - gocritic
+    - gofmt
+    - goimports
+    - gocyclo
+    - gosec
+    - gosimple
+    - ineffassign
+    - misspell
+    - nolintlint
+    - nakedret
+    - prealloc
+    - predeclared
+    - revive
+    - staticcheck
+    - thelper
+    - tparallel
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+    - wsl
+
+issues:
+  exclude-rules:
+    - path: ".*_test.go"
+      linters:
+        - errcheck
+    - path: ".*_test.go"
+      linters:
+        - revive
+      text: "^(unchecked-type-assertion)"
+
+run:
+  issues-exit-code: 1

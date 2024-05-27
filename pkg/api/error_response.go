@@ -11,8 +11,8 @@ type ErrorResponse struct {
 	Details string `json:"details,omitempty"`
 }
 
-func CreateErrorResponse(err error, config cfg.Config) (int, ErrorResponse) {
-	apiError, ok := err.(ApiError)
+func CreateErrorResponse(err error, config *cfg.Config) (int, ErrorResponse) {
+	apiError, ok := err.(Error)
 
 	if ok {
 		return apiError.Code, ErrorResponse{Error: apiError.Message}

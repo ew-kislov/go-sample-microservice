@@ -16,7 +16,7 @@ import (
 // @Success			  200 {object} StatusResponse
 // @Failure       500 {object} api.ErrorResponse
 // @Router			  /internal/status [get]
-func (controller *statusController) GetStatus(ctx *gin.Context) {
+func (*statusController) GetStatus(ctx *gin.Context) {
 	response := StatusResponse{
 		Version:    version.Version,
 		Commit:     version.Commit,

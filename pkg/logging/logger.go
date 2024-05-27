@@ -1,4 +1,4 @@
-package logger
+package logging
 
 import (
 	"os"
@@ -9,11 +9,11 @@ import (
 
 type ContextHook struct{}
 
-func (hook *ContextHook) Levels() []logrus.Level {
+func (*ContextHook) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
 
-func (hook *ContextHook) Fire(entry *logrus.Entry) error {
+func (*ContextHook) Fire(entry *logrus.Entry) error {
 	if entry.Context == nil {
 		return nil
 	}
@@ -22,10 +22,11 @@ func (hook *ContextHook) Fire(entry *logrus.Entry) error {
 	if ok {
 		entry.Data["requestId"] = requestId
 	}
+
 	return nil
 }
 
-func CreateLogger(config cfg.Config) *logrus.Logger {
+func CreateLogger(config *cfg.Config) *logrus.Logger {
 	logger := logrus.New()
 
 	logger.SetFormatter(&logrus.TextFormatter{

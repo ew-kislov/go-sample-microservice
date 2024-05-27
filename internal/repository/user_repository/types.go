@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/ew-kislov/go-sample-microservice/pkg/db"
+	"github.com/ew-kislov/go-sample-microservice/pkg/sql"
 )
 
 type CreateUserParams struct {
@@ -27,14 +27,14 @@ type User struct {
 }
 
 type UserRepository interface {
-	Create(ctx context.Context, params CreateUserParams) (int64, error)
+	Create(ctx context.Context, params *CreateUserParams) (int64, error)
 	GetById(ctx context.Context, id int64) (*User, error)
 }
 
 type userRepository struct {
-	db db.Database
+	db sql.Database
 }
 
-func NewUserRepository(db db.Database) UserRepository {
+func NewUserRepository(db sql.Database) UserRepository {
 	return &userRepository{db}
 }

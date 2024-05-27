@@ -13,6 +13,9 @@ LDFLAGS := -X $(MODULE_NAME)/pkg/version.Version=$(GIT_VERSION) \
 run:
 	go run -ldflags "$(LDFLAGS)" ./cmd/main.go
 
+lint:
+	golangci-lint run
+
 test_unit:
 	go test ./internal/...
 

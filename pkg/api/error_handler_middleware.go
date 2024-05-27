@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ErrorHandlerMiddleware(config cfg.Config) gin.HandlerFunc {
+func ErrorHandlerMiddleware(config *cfg.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 

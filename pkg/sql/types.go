@@ -1,4 +1,4 @@
-package db
+package sql
 
 import (
 	"context"
@@ -33,10 +33,10 @@ type ExecResult struct {
 	RowsAffected int64
 }
 
-type QueryResult []map[string]interface{}
+type QueryResult []map[string]any
 
 type Database interface {
-	Query(ctx context.Context, query string, params ...interface{}) (QueryResult, error)
-	Exec(ctx context.Context, query string, params ...interface{}) (*ExecResult, error)
-	Close()
+	Query(ctx context.Context, query string, params ...any) (QueryResult, error)
+	Exec(ctx context.Context, query string, params ...any) (*ExecResult, error)
+	Close() error
 }

@@ -1,4 +1,4 @@
-package db
+package sql
 
 import (
 	"context"
@@ -11,24 +11,26 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func CreateDatabase(config cfg.Config, logger *logrus.Logger) Database {
+func CreateDatabase(config *cfg.Config, logger *logrus.Logger) Database {
 	return &database{
 		db:     connectDb(config),
 		logger: logger,
 	}
 }
 
-func (d *database) Query(ctx context.Context, query string, params ...interface{}) (QueryResult, error) {
+func (d *database) Query(ctx context.Context, query string, params ...any) (QueryResult, error) {
 	start := time.Now()
 
 	d.logger.WithContext(ctx).WithFields(logrus.Fields{"args": params}).Infof("Query started: `%s`.", query)
 
-	result, err := d.query(ctx, query, params...)
+	result, err := d.queryInternal(ctx, query, params...)
 
 	fields := logrus.Fields{"args": params, "result": result, "durationMs": time.Since(start).Milliseconds()}
 
 	if err != nil {
-		d.logger.WithContext(ctx).WithFields(fields).Infof("Query failed with error. Query: `%s`. Error: %s", query, err.Error())
+		d.logger.WithContext(ctx).WithFields(fields).Infof(
+			"Query failed with error. Query: `%s`. Error: %s", query, err.Error(),
+		)
 	} else {
 		d.logger.WithContext(ctx).WithFields(fields).Infof("Query finished: `%s`.", query)
 	}
@@ -36,17 +38,19 @@ func (d *database) Query(ctx context.Context, query string, params ...interface{
 	return result, err
 }
 
-func (d *database) Exec(ctx context.Context, query string, params ...interface{}) (*ExecResult, error) {
+func (d *database) Exec(ctx context.Context, query string, params ...any) (*ExecResult, error) {
 	start := time.Now()
 
 	d.logger.WithContext(ctx).WithFields(logrus.Fields{"args": params}).Infof("Query started: `%s`.", query)
 
-	result, err := d.exec(ctx, query, params)
+	result, err := d.execInternal(ctx, query, params)
 
 	fields := logrus.Fields{"args": params, "result": result, "durationMs": time.Since(start).Milliseconds()}
 
 	if err != nil {
-		d.logger.WithContext(ctx).WithFields(fields).Infof("Query failed with error. Query: `%s`. Error: %s", query, err.Error())
+		d.logger.WithContext(ctx).WithFields(fields).Infof(
+			"Query failed with error. Query: `%s`. Error: %s", query, err.Error(),
+		)
 	} else {
 		d.logger.WithContext(ctx).WithFields(fields).Infof("Query finished: `%s`.", query)
 	}
@@ -54,11 +58,11 @@ func (d *database) Exec(ctx context.Context, query string, params ...interface{}
 	return result, err
 }
 
-func (d *database) Close() {
-	d.db.Close()
+func (d *database) Close() error {
+	return d.db.Close()
 }
 
-func (d *database) query(_ context.Context, query string, params ...interface{}) (QueryResult, error) {
+func (d *database) queryInternal(_ context.Context, query string, params ...any) (QueryResult, error) {
 	rows, err := d.db.Query(query, params...)
 
 	if err == nil {
@@ -68,7 +72,7 @@ func (d *database) query(_ context.Context, query string, params ...interface{})
 	}
 }
 
-func (d *database) exec(_ context.Context, query string, params ...interface{}) (*ExecResult, error) {
+func (d *database) execInternal(_ context.Context, query string, params ...any) (*ExecResult, error) {
 	result, err := d.db.Exec(query, params)
 
 	if err != nil {
@@ -99,7 +103,7 @@ func (*database) handleQueryError(err error) error {
 	return err
 }
 
-func (*database) mapRowsToMap(rows *sql.Rows) ([]map[string]interface{}, error) {
+func (*database) mapRowsToMap(rows *sql.Rows) ([]map[string]any, error) {
 	defer rows.Close()
 
 	columns, err := rows.Columns()
@@ -107,11 +111,11 @@ func (*database) mapRowsToMap(rows *sql.Rows) ([]map[string]interface{}, error) 
 		return nil, fmt.Errorf("error getting columns: %w", err)
 	}
 
-	results := []map[string]interface{}{}
+	results := []map[string]any{}
 
 	for rows.Next() {
-		values := make([]interface{}, len(columns))
-		valuePtrs := make([]interface{}, len(columns))
+		values := make([]any, len(columns))
+		valuePtrs := make([]any, len(columns))
 
 		for i := range values {
 			valuePtrs[i] = &values[i]
@@ -121,7 +125,7 @@ func (*database) mapRowsToMap(rows *sql.Rows) ([]map[string]interface{}, error) 
 			return nil, fmt.Errorf("error scanning row: %w", err)
 		}
 
-		rowMap := make(map[string]interface{})
+		rowMap := make(map[string]any)
 		for i, col := range columns {
 			rowMap[col] = values[i]
 		}
@@ -136,7 +140,7 @@ func (*database) mapRowsToMap(rows *sql.Rows) ([]map[string]interface{}, error) 
 	return results, nil
 }
 
-func connectDb(config cfg.Config) *sql.DB {
+func connectDb(config *cfg.Config) *sql.DB {
 	dsn := fmt.Sprintf(
 		"user=%s dbname=%s sslmode=disable password=%s host=%s",
 		config.DatabaseUser, config.DatabaseName, config.DatabasePassword, config.DatabaseHost,

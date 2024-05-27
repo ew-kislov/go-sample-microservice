@@ -22,7 +22,9 @@ func TestGetMe(t *testing.T) {
 		resp, _ := http.Get(endpoint)
 		bodyRay, _ := io.ReadAll(resp.Body)
 
-		var body map[string]interface{}
+		defer resp.Body.Close()
+
+		var body map[string]any
 		_ = json.Unmarshal(bodyRay, &body)
 
 		assert.Equal(t, resp.StatusCode, http.StatusUnauthorized)
@@ -41,16 +43,18 @@ func TestGetMe(t *testing.T) {
 		)
 		id := result[0]["id"].(int64)
 
-		token, _ := jwt.CreateJwt(map[string]interface{}{"id": id}, Config.JwtSecret)
+		token, _ := jwt.CreateJwt(map[string]any{"id": id}, Config.JwtSecret)
 
 		client := &http.Client{}
-		req, _ := http.NewRequest("GET", endpoint, nil)
+		req, _ := http.NewRequest("GET", endpoint, http.NoBody)
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
 		resp, _ := client.Do(req)
 		bodyRaw, _ := io.ReadAll(resp.Body)
 
-		var body map[string]interface{}
+		defer resp.Body.Close()
+
+		var body map[string]any
 		_ = json.Unmarshal(bodyRaw, &body)
 
 		var actualData getmecontroller.UserResponse

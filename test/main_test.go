@@ -9,20 +9,20 @@ import (
 
 	"github.com/ew-kislov/go-sample-microservice/internal"
 	"github.com/ew-kislov/go-sample-microservice/pkg/cfg"
-	"github.com/ew-kislov/go-sample-microservice/pkg/db"
-	"github.com/ew-kislov/go-sample-microservice/pkg/logger"
+	"github.com/ew-kislov/go-sample-microservice/pkg/logging"
+	"github.com/ew-kislov/go-sample-microservice/pkg/sql"
 )
 
 var (
 	Config cfg.Config
-	Db     db.Database
+	Db     sql.Database
 )
 
 func TestMain(m *testing.M) {
 	go internal.StartApp("../.env.test")
 
 	Config = cfg.ParseConfig("../.env.test")
-	Db = db.CreateDatabase(Config, logger.CreateLogger(Config))
+	Db = sql.CreateDatabase(&Config, logging.CreateLogger(&Config))
 
 	waitServer()
 
@@ -43,10 +43,23 @@ func waitServer() {
 		case <-ctx.Done():
 			panic("Server timed out")
 		case <-ticker.C:
-			resp, err := http.Get(fmt.Sprintf("http://localhost:%d/api/v1/internal/status", Config.ServerPort))
-			if err == nil && resp.StatusCode == http.StatusOK {
+			if serverReady() {
 				return
 			}
 		}
 	}
+}
+
+func serverReady() bool {
+	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/api/v1/internal/status", Config.ServerPort))
+
+	if err == nil {
+		defer resp.Body.Close()
+	}
+
+	if err == nil && resp.StatusCode == http.StatusOK {
+		return true
+	}
+
+	return false
 }

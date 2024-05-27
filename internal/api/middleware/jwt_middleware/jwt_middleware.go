@@ -12,16 +12,16 @@ import (
 )
 
 const (
-	TokenNotProvided = "Token was not provided"
-	WrongTokenFormat = "Authorization header must have format: Bearer <Token>"
+	AuthorizationHeaderNotProvided = "Authorization header was not provided"
+	WrongTokenFormat               = "Authorization header must have format: Bearer <Token>"
 )
 
-func JwtMiddleware(authService authservice.AuthService, config cfg.Config) gin.HandlerFunc {
+func JwtMiddleware(authService authservice.AuthService, config *cfg.Config) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		header := ctx.GetHeader("Authorization")
 
 		if header == "" {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, api.ErrorResponse{Error: TokenNotProvided})
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, api.ErrorResponse{Error: AuthorizationHeaderNotProvided})
 			return
 		}
 
@@ -39,6 +39,7 @@ func JwtMiddleware(authService authservice.AuthService, config cfg.Config) gin.H
 		if err != nil {
 			code, response := api.CreateErrorResponse(err, config)
 			ctx.AbortWithStatusJSON(code, response)
+
 			return
 		}
 
