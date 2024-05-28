@@ -1,24 +1,13 @@
 basePath: /api/v1
 definitions:
-  api.ErrorResponse:
+  ErrorResponse:
     properties:
       details:
         type: string
       error:
         type: string
     type: object
-  getmecontroller.UserResponse:
-    properties:
-      displayName:
-        type: string
-      email:
-        type: string
-      id:
-        type: integer
-      username:
-        type: string
-    type: object
-  signupcontroller.SignUpRequest:
+  SignUpRequest:
     properties:
       displayName:
         type: string
@@ -34,20 +23,31 @@ definitions:
     - password
     - username
     type: object
-  signupcontroller.SignUpResponse:
+  SignUpResponse:
     properties:
       token:
         type: string
       userId:
         type: integer
     type: object
-  statuscontroller.StatusResponse:
+  StatusResponse:
     properties:
       buildDate:
         type: string
       commit:
         type: string
       version:
+        type: string
+    type: object
+  UserResponse:
+    properties:
+      displayName:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      username:
         type: string
     type: object
 info:
@@ -65,15 +65,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/getmecontroller.UserResponse'
+            $ref: '#/definitions/UserResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/api.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/api.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get user info
@@ -89,30 +89,30 @@ paths:
         name: account
         required: true
         schema:
-          $ref: '#/definitions/signupcontroller.SignUpRequest'
+          $ref: '#/definitions/SignUpRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/signupcontroller.SignUpResponse'
+            $ref: '#/definitions/SignUpResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/api.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
         "409":
           description: Conflict
           schema:
-            $ref: '#/definitions/api.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/api.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
       summary: Sign up user
       tags:
       - Auth
@@ -126,11 +126,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/statuscontroller.StatusResponse'
+            $ref: '#/definitions/StatusResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/api.ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
       summary: Get status
       tags:
       - Internal

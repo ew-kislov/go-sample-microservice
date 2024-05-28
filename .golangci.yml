@@ -33,10 +33,12 @@ linters-settings:
         disabled: true
       - name: unnecessary-stmt
         disabled: true
+      - name: max-public-structs
+        disabled: true
   gosec:
     excludes: ["G107"]
   nolintlint:
-    require-explanation: true
+    require-explanation: false
     require-specific: true
 
 linters:

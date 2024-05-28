@@ -9,7 +9,7 @@ import (
 type ErrorResponse struct {
 	Error   string `json:"error"`
 	Details string `json:"details,omitempty"`
-}
+} // @name ErrorResponse
 
 func CreateErrorResponse(err error, config *cfg.Config) (int, ErrorResponse) {
 	apiError, ok := err.(Error)

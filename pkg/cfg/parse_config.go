@@ -23,7 +23,7 @@ type Config struct {
 	ElasticSearch    string `mapstructure:"ELASTIC_SEARCH_HOST"`
 }
 
-func ParseConfig(configPath string) Config {
+func ParseConfig(configPath string) *Config {
 	var config Config
 
 	viper.SetConfigFile(configPath)
@@ -39,5 +39,5 @@ func ParseConfig(configPath string) Config {
 		panic(fmt.Errorf("got error while parsing config: %w", err))
 	}
 
-	return config
+	return &config
 }

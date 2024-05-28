@@ -1,4 +1,4 @@
-package jwtmiddleware
+package middleware
 
 import (
 	"encoding/json"

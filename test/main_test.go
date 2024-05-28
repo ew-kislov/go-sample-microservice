@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	Config cfg.Config
+	Config *cfg.Config
 	Db     sql.Database
 )
 
@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 	go internal.StartApp("../.env.test")
 
 	Config = cfg.ParseConfig("../.env.test")
-	Db = sql.CreateDatabase(&Config, logging.CreateLogger(&Config))
+	Db = sql.CreateDatabase(Config, logging.CreateLogger(Config))
 
 	waitServer()
 

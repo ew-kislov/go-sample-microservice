@@ -14,12 +14,12 @@ type SignUpRequest struct {
 	Username    string `json:"username" binding:"required"`
 	DisplayName string `json:"displayName" binding:"required"`
 	Password    string `json:"password" binding:"required"`
-}
+} // @name SignUpRequest
 
 type SignUpResponse struct {
 	UserId int64  `json:"userId"`
 	Token  string `json:"token"`
-}
+} // @name SignUpResponse
 
 // SignUp godoc
 //
@@ -29,10 +29,10 @@ type SignUpResponse struct {
 // @Produce     application/json
 // @Param       account body SignUpRequest true "Sign up request"
 // @Success     201 {object} SignUpResponse
-// @Failure     400 {object} api.ErrorResponse
-// @Failure     409 {object} api.ErrorResponse
-// @Failure     422 {object} api.ErrorResponse
-// @Failure     500 {object} api.ErrorResponse
+// @Failure     400 {object} ErrorResponse
+// @Failure     409 {object} ErrorResponse
+// @Failure     422 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
 // @Router      /auth/sign-up [post]
 func NewSignUpHandler(service authservice.AuthService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {

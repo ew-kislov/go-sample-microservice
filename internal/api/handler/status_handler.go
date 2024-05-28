@@ -8,10 +8,10 @@ import (
 )
 
 type StatusResponse struct {
-	Version    string `json:"version"`
-	Commit     string `json:"commit"`
-	BbuildDate string `json:"buildDate"`
-}
+	Version   string `json:"version"`
+	Commit    string `json:"commit"`
+	BuildDate string `json:"buildDate"`
+} // @name StatusResponse
 
 // GetStatus godoc
 //
@@ -20,14 +20,14 @@ type StatusResponse struct {
 // @Produce			  application/json
 // @Tags			    Internal
 // @Success			  200 {object} StatusResponse
-// @Failure       500 {object} api.ErrorResponse
+// @Failure       500 {object} ErrorResponse
 // @Router			  /internal/status [get]
 func GetStatusHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		response := StatusResponse{
-			Version:    version.Version,
-			Commit:     version.Commit,
-			BbuildDate: version.BuildDate,
+			Version:   version.Version,
+			Commit:    version.Commit,
+			BuildDate: version.BuildDate,
 		}
 
 		ctx.JSON(http.StatusOK, response)

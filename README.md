@@ -9,10 +9,10 @@ It can be used as a template.
 
 - REST API endpoints
 - JWT authorization
-- SQL database as a storage
+- SQL database
 - Database migrations
-- Auto generated OpenApi documentation
-- End-to-End logging (with Request ID). Includes HTTP requests logging, database queries logging
+- Auto generated OpenApi documentation (accessible by URL `http://localhost:<PORT>/swagger/index.html`)
+- End-to-End logging (with Request ID). Includes HTTP requests logging, database query logging
 - Testing infrastructure (mocks, integration tests)
 - Linter
 

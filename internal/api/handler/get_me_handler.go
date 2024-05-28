@@ -13,7 +13,7 @@ type UserResponse struct {
 	Email       string `json:"email"`
 	Username    string `json:"username"`
 	DisplayName string `json:"displayName"`
-}
+} // @name UserResponse
 
 // GetMe godoc
 //
@@ -23,9 +23,9 @@ type UserResponse struct {
 // @Tags			    Auth
 // @Security			BearerAuth
 // @Success			  200 {object} UserResponse
-// @Failure			  401 {object} api.ErrorResponse
-// @Failure			  401 {object} api.ErrorResponse
-// @Failure			  404 {object} api.ErrorResponse
+// @Failure			  401 {object} ErrorResponse
+// @Failure			  401 {object} ErrorResponse
+// @Failure			  404 {object} ErrorResponse
 // @Router			  /auth/me [get]
 func NewGetMeHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
