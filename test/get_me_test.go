@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"testing"
 
-	getmecontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/get_me_controller"
+	"github.com/ew-kislov/go-sample-microservice/internal/api/handler"
 	"github.com/ew-kislov/go-sample-microservice/pkg/jwt"
 	"github.com/google/uuid"
 	"github.com/mitchellh/mapstructure"
@@ -57,10 +57,10 @@ func TestGetMe(t *testing.T) {
 		var body map[string]any
 		_ = json.Unmarshal(bodyRaw, &body)
 
-		var actualData getmecontroller.UserResponse
+		var actualData handler.UserResponse
 		_ = mapstructure.Decode(body, &actualData)
 
-		expectedData := getmecontroller.UserResponse{
+		expectedData := handler.UserResponse{
 			Id:          int(id),
 			Email:       email,
 			Username:    username,

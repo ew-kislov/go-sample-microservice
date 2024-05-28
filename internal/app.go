@@ -23,9 +23,7 @@ import (
 	userrepository "github.com/ew-kislov/go-sample-microservice/internal/repository/user_repository"
 	authservice "github.com/ew-kislov/go-sample-microservice/internal/service/auth_service"
 
-	getmecontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/get_me_controller"
-	signupcontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/sign_up_controller"
-	statuscontroller "github.com/ew-kislov/go-sample-microservice/internal/api/controller/status_controller"
+	"github.com/ew-kislov/go-sample-microservice/internal/api/handler"
 )
 
 // @title           Sample microservice API
@@ -52,10 +50,6 @@ func StartApp(configPath string) {
 
 	jwtMiddleware := jwtmiddleware.JwtMiddleware(authService, &config)
 
-	signUpController := signupcontroller.NewSignUpController(authService)
-	getMeController := getmecontroller.NewGetMeController()
-	statusController := statuscontroller.NewStatusController()
-
 	if config.Env == cfg.Production {
 		gin.SetMode(gin.ReleaseMode)
 	} else {
@@ -73,13 +67,13 @@ func StartApp(configPath string) {
 	{
 		public := v1.Group("/auth")
 		{
-			public.POST("/sign-up", signUpController.SignUp)
-			public.GET("/me", jwtMiddleware, getMeController.GetMe)
+			public.POST("/sign-up", handler.NewSignUpHandler(authService))
+			public.GET("/me", jwtMiddleware, handler.NewGetMeHandler())
 		}
 
 		internal := v1.Group("/internal")
 		{
-			internal.GET("/status", statusController.GetStatus)
+			internal.GET("/status", handler.GetStatusHandler())
 		}
 	}
 
